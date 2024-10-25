@@ -11,31 +11,35 @@ const PostList: React.FC = () => {
     const fetchPosts = async () => {
       try {
         const response = await axiosApi.get('/posts.json');
-        const fetchedPosts: Post[] = Object.keys(response.data).map(key => ({
-          id: key,
-          ...response.data[key]
+        const postsData: Post[] = Object.entries(response.data).map(([id, post]) => ({
+          id,
+          title: post.title || 'Без заголовка',
+          content: post.content || 'Нет содержимого',
+          date: post.date || '',
         }));
-        setPosts(fetchedPosts);
+        setPosts(postsData);
       } catch (error) {
         console.error("Ошибка при загрузке постов:", error);
       }
     };
+
     fetchPosts();
   }, []);
+
+  if (posts.length === 0) return <div>Загрузка...</div>;
 
   return (
     <Container>
       <Typography variant="h4" gutterBottom>Список постов</Typography>
-      <Link to="/new-post">
-        <Button variant="contained" color="primary">Добавить пост</Button>
-      </Link>
       {posts.map(post => (
-        <Card key={post.id} style={{ margin: '10px 0' }}>
+        <Card key={post.id} sx={{ marginBottom: 2 }}>
           <CardContent>
             <Typography variant="h5">{post.title}</Typography>
-            <Link to={`/posts/${post.id}`}>
-              <Button variant="outlined">Read More</Button>
-            </Link>
+            <Typography variant="subtitle1">
+              {post.date ? new Date(post.date).toLocaleString() : 'Дата не указана'}
+            </Typography>
+            <Typography variant="body2">{post.content.substring(0, 100)}...</Typography>
+            <Button size="small" component={Link} to={`/posts/${post.id}`}>Read More</Button>
           </CardContent>
         </Card>
       ))}
