@@ -28,7 +28,7 @@ const PostForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const postData: Post = { title, content };
+    const postData: Post = { title, content, date: new Date().toISOString() }; // Добавляем дату
 
     try {
       if (id) {
