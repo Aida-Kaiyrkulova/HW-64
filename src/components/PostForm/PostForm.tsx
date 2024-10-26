@@ -1,26 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Container, TextField, Button, Typography } from '@mui/material';
-import axiosApi from '../../axiosApi';
-import { Post } from '../../types';
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { Container, TextField, Button, Typography } from "@mui/material";
+import axiosApi from "../../axiosApi";
+import { Post } from "../../types";
 
 const PostForm: React.FC = () => {
   const { id } = useParams<{ id?: string }>();
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
   const navigate = useNavigate();
-  const [title, setTitle] = useState<string>('');
-  const [content, setContent] = useState<string>('');
 
   useEffect(() => {
     if (id) {
       const fetchPost = async () => {
-        try {
-          const response = await axiosApi.get(`/posts/${id}.json`);
-          const postData: Post = response.data;
-          setTitle(postData.title);
-          setContent(postData.content);
-        } catch (error) {
-          console.error("Ошибка при загрузке поста:", error);
-        }
+        const response = await axiosApi.get(`/posts/${id}.json`);
+        setTitle(response.data.title || "");
+        setContent(response.data.content || "");
       };
       fetchPost();
     }
@@ -28,43 +23,47 @@ const PostForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const postData: Post = { title, content, date: new Date().toISOString() }; // Добавляем дату
+    const postData: Post = { title, content, date: new Date().toISOString() };
 
     try {
       if (id) {
         await axiosApi.put(`/posts/${id}.json`, postData);
       } else {
-        await axiosApi.post('/posts.json', postData);
+        await axiosApi.post("/posts.json", postData);
       }
-      navigate('/');
+      navigate("/");
     } catch (error) {
-      console.error("Ошибка при сохранении поста:", error);
+      console.error("Ошибка", error);
     }
   };
 
   return (
-    <Container>
-      <Typography variant="h4">{id ? 'Редактировать пост' : 'Добавить новый пост'}</Typography>
+    <Container style={{ marginTop: 20 }}>
+      <Typography variant="h4" style={{ marginBottom: 8 }}>
+        {id ? "Редактировать пост" : "Добавить новый пост"}
+      </Typography>
       <form onSubmit={handleSubmit}>
         <TextField
           label="Заголовок"
+          style={{ marginBottom: 8 }}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           fullWidth
-          margin="normal"
           required
         />
         <TextField
           label="Содержимое"
+          style={{ marginBottom: 8 }}
           value={content}
           onChange={(e) => setContent(e.target.value)}
           multiline
           rows={4}
           fullWidth
-          margin="normal"
           required
         />
-        <Button type="submit" variant="contained" color="primary">{id ? 'Сохранить' : 'Добавить'}</Button>
+        <Button type="submit" variant="contained">
+          Сохранить
+        </Button>
       </form>
     </Container>
   );
